@@ -1,0 +1,9 @@
+---
+- name: Ensure SELinux Python Bindings are installed
+  yum: name=libselinux-python state=installed
+
+- name: Ensure ZSH is installed
+  yum: name=zsh state=installed
+
+- name: Ensure git is installed
+  yum: name=git state=installed
