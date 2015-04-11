@@ -1,0 +1,85 @@
+---
+- name: Ensure ZSH is installed
+  apt: name=zsh state=installed
+
+- name: Ensure git is installed
+  apt: name=git state=installed
+
+- name: Create the user account
+  user: name={{ ryane_dotfiles_user_name }}
+        password={{ RYANE_DOTFILES_PASSWORD }}
+        shell=/usr/bin/zsh
+
+- name: Add user to sudoers
+  lineinfile: dest=/etc/sudoers
+              regexp="{{ ryane_dotfiles_user_name }} ALL"
+              line="{{ ryane_dotfiles_user_name }} ALL=(ALL) ALL"
+              state=present
+
+- name: Add my public key to the server
+  authorized_key: user={{ ryane_dotfiles_user_name }}
+                  key="{{ item }}"
+  with_items:
+    - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCrnXsBoNE3GVocpmhpRWBABKLv4iAhDWPLJNADwph8I+9uhpiNFw6CuwwQByct4Qvj1mSVd6NoEg1XC4cJYSj8luE19Z7HhZ3H/pOCMedHSlZ0rEjJxTzs4Br6AwBLCaA2r4OD+7ACtM43yhWNBvNB9CV2ciItcYRV9hnTRDfPMNwOMRqfFC2A1kfs4JWWPQLrA1ueZFh3bQFKdHWwpsNcgsjtNDNf0AWvWvO1325lmPMBr9xRPyU1buHR8PPmDC4k/oIASUUvRxUym0c0JhMBh13IexiR8BbmMPLRe79CffP9+fgM2yWvW0qMnFLB8S48BFHTaOWNAF62xiEn+lCR"
+    - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDh2dwzneWJf0MUBdmryiAeoyjT7TFMyM6tEBp8xMStnj43tWs0wJ3YTLgTzgpp1ejSoRoRGS+kJ10Jqo8sTMvEaH0SKMnNX5FIbUltcwF/klKUO2q6LPhychgajEVMIpSmotyWLbqyQAUa1rgpThWblw426eoD3LJ+35ZU04sWnNe8pzQjuHVyaXTbPtlKQtWGCf1iLKJ/jCv/scWgl+ehBS1Mn2N3S6V/lLWe0dF3U2TNQBr9l0koc/G/P1jhUhNwFEUq1h7nAYFEZ7eNKtKj8r8Idj05NGFDNGbA5JySY+BBDRRudxPxtaApE3COxzHzsbecP0lXvlgYZ17MtJx jenkins@goodjoss"
+
+- name: Install oh-my-zsh
+  git: repo=https://github.com/robbyrussell/oh-my-zsh.git
+       dest=/home/{{ ryane_dotfiles_user_name }}/.oh-my-zsh
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
+
+- name: Clone ryane/dotfiles
+  git: repo=https://github.com/ryane/dotfiles.git
+       dest=/home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
+
+- name: Install dotfiles
+  shell: ./install.sh --skip-bundle
+  args:
+    executable: /bin/bash
+    chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
+    creates: /home/{{ ryane_dotfiles_user_name }}/.zshrc
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
+
+- name: Setup vim tomorrow theme
+  shell: ./install-tomorrow-theme.sh
+  args:
+    executable: /bin/bash
+    chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
+    creates: /home/{{ ryane_dotfiles_user_name }}/.vim/colors/Tomorrow.vim
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
+
+- name: Install vundle to manage vim plugins
+  git: repo=https://github.com/gmarik/vundle.git
+       dest=/home/{{ ryane_dotfiles_user_name }}/.vim/bundle/vundle
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
+
+- name: Check if vim plugins are installed
+  shell: ls -l | grep -c ^d
+  args:
+    executable: /bin/bash
+    chdir: /home/{{ ryane_dotfiles_user_name }}/.vim/bundle
+  register: vim_bundle_count
+  changed_when: false
+
+- name: Install vim plugins
+  shell: /usr/bin/vim -e +BundleInstall +qall || true
+  args:
+    executable: /bin/bash
+    executable: /bin/bash
+    chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
+  when: vim_bundle_count.stdout|int <= 1
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
+
+- name: Clone ryane/.emacs.d
+  git: repo=https://github.com/ryane/.emacs.d.git
+       dest=/home/{{ ryane_dotfiles_user_name }}/.emacs.d
+  remote_user: "{{ ryane_dotfiles_user_name }}"
+  sudo: false
