@@ -74,7 +74,7 @@
   changed_when: false
 
 - name: Install vim plugins
-  shell: /usr/bin/vim -e +BundleInstall +qall || true
+  shell: /usr/bin/vim -e +BundleInstall +qall
   args:
     executable: /bin/bash
     executable: /bin/bash
