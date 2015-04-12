@@ -63,26 +63,3 @@
   git: repo=https://github.com/gmarik/vundle.git
        dest=/home/{{ ryane_dotfiles_user_name }}/.vim/bundle/vundle
   sudo_user: "{{ ryane_dotfiles_user_name }}"
-
-- name: Check if vim plugins are installed
-  shell: ls -l | grep -c ^d
-  args:
-    executable: /bin/bash
-    chdir: /home/{{ ryane_dotfiles_user_name }}/.vim/bundle
-  sudo_user: "{{ ryane_dotfiles_user_name }}"
-  register: vim_bundle_count
-  changed_when: false
-
-- name: Install vim plugins
-  shell: cd /home/{{ ryane_dotfiles_user_name }}; /usr/bin/vim -e +BundleInstall +qall
-  args:
-    executable: /bin/bash
-    executable: /bin/bash
-    # chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
-  when: vim_bundle_count.stdout|int <= 1
-  register: vim_bundle
-  sudo_user: "{{ ryane_dotfiles_user_name }}"
-  failed_when: false
-
-- name: Debug vim_bundle
-  debug: var=vim_bundle
