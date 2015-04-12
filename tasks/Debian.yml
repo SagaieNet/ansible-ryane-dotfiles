@@ -2,5 +2,8 @@
 - name: Ensure ZSH is installed
   apt: name=zsh state=installed
 
+- name: Ensure vim is installed
+  apt: name=vim state=installed
+
 - name: Ensure git is installed
   apt: name=git state=installed

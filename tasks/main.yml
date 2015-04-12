@@ -19,19 +19,29 @@
 - name: Add my public key to the server
   authorized_key: user={{ ryane_dotfiles_user_name }}
                   key="{{ item }}"
-  with_items: "{{ ryane_dotfiles_public_keys }}"
+  with_items: ryane_dotfiles_public_keys
 
 - name: Install oh-my-zsh
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git
        dest=/home/{{ ryane_dotfiles_user_name }}/.oh-my-zsh
-  remote_user: "{{ ryane_dotfiles_user_name }}"
-  sudo: false
+  sudo_user: "{{ ryane_dotfiles_user_name }}"
 
 - name: Clone ryane/dotfiles
   git: repo=https://github.com/ryane/dotfiles.git
        dest=/home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
-  remote_user: "{{ ryane_dotfiles_user_name }}"
-  sudo: false
+
+- name: Check state of .zshrc file
+  stat: path=/home/{{ ryane_dotfiles_user_name }}/.zshrc
+  register: zshrc
+
+- name: Backup existing .zshrc file if it exists
+  command: cp /home/{{ ryane_dotfiles_user_name }}/.zshrc /home/{{ ryane_dotfiles_user_name }}/.zshrc.bak
+  when: zshrc.stat.exists and zshrc.stat.isreg
+
+- name: Delete existing .zshrc file if it exists
+  file: name=/home/{{ ryane_dotfiles_user_name }}/.zshrc
+        state=absent
+  when: zshrc.stat.exists and zshrc.stat.isreg
 
 - name: Install dotfiles
   shell: ./install.sh --skip-bundle
@@ -39,8 +49,7 @@
     executable: /bin/bash
     chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
     creates: /home/{{ ryane_dotfiles_user_name }}/.zshrc
-  remote_user: "{{ ryane_dotfiles_user_name }}"
-  sudo: false
+  sudo_user: "{{ ryane_dotfiles_user_name }}"
 
 - name: Setup vim tomorrow theme
   shell: ./install-tomorrow-theme.sh
@@ -48,14 +57,12 @@
     executable: /bin/bash
     chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
     creates: /home/{{ ryane_dotfiles_user_name }}/.vim/colors/Tomorrow.vim
-  remote_user: "{{ ryane_dotfiles_user_name }}"
-  sudo: false
+  sudo_user: "{{ ryane_dotfiles_user_name }}"
 
 - name: Install vundle to manage vim plugins
   git: repo=https://github.com/gmarik/vundle.git
        dest=/home/{{ ryane_dotfiles_user_name }}/.vim/bundle/vundle
-  remote_user: "{{ ryane_dotfiles_user_name }}"
-  sudo: false
+  sudo_user: "{{ ryane_dotfiles_user_name }}"
 
 - name: Check if vim plugins are installed
   shell: ls -l | grep -c ^d
@@ -72,5 +79,4 @@
     executable: /bin/bash
     chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
   when: vim_bundle_count.stdout|int <= 1
-  remote_user: "{{ ryane_dotfiles_user_name }}"
-  sudo: false
+  sudo_user: "{{ ryane_dotfiles_user_name }}"
