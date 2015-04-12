@@ -1,4 +1,5 @@
 ---
 ryane_dotfiles_user_name: ryan
 ryane_dotfiles_dotfiles_directory: .dotfiles
-
+ryane_dotfiles_public_keys:
+  - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"

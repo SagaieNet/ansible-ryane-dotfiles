@@ -19,8 +19,7 @@
 - name: Add my public key to the server
   authorized_key: user={{ ryane_dotfiles_user_name }}
                   key="{{ item }}"
-  with_items:
-    - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  with_items: "{{ ryane_dotfiles_public_keys }}"
 
 - name: Install oh-my-zsh
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git
