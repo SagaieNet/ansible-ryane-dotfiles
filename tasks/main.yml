@@ -79,4 +79,8 @@
     executable: /bin/bash
     chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
   when: vim_bundle_count.stdout|int <= 1
+  register: vim_bundle
   sudo_user: "{{ ryane_dotfiles_user_name }}"
+
+- name: Debug vim_bundle
+  debug: var=vim_bundle
