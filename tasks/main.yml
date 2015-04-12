@@ -74,7 +74,7 @@
   changed_when: false
 
 - name: Install vim plugins
-  shell: cd /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}; /usr/bin/vim -e +BundleInstall +qall
+  shell: cd /home/{{ ryane_dotfiles_user_name }}; /usr/bin/vim -e +BundleInstall +qall
   args:
     executable: /bin/bash
     executable: /bin/bash
@@ -82,6 +82,7 @@
   when: vim_bundle_count.stdout|int <= 1
   register: vim_bundle
   sudo_user: "{{ ryane_dotfiles_user_name }}"
+  failed_when: false
 
 - name: Debug vim_bundle
   debug: var=vim_bundle
