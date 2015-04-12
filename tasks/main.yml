@@ -74,11 +74,11 @@
   changed_when: false
 
 - name: Install vim plugins
-  shell: /usr/bin/vim -e +BundleInstall +qall
+  shell: cd /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}; /usr/bin/vim -e +BundleInstall +qall
   args:
     executable: /bin/bash
     executable: /bin/bash
-    chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
+    # chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
   when: vim_bundle_count.stdout|int <= 1
   register: vim_bundle
   sudo_user: "{{ ryane_dotfiles_user_name }}"
