@@ -29,6 +29,7 @@
 - name: Clone ryane/dotfiles
   git: repo=https://github.com/ryane/dotfiles.git
        dest=/home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
+  sudo_user: "{{ ryane_dotfiles_user_name }}"
 
 - name: Check state of .zshrc file
   stat: path=/home/{{ ryane_dotfiles_user_name }}/.zshrc
