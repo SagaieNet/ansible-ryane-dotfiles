@@ -45,7 +45,7 @@
   when: zshrc.stat.exists and zshrc.stat.isreg
 
 - name: Install dotfiles
-  shell: ./install.sh --skip-bundle
+  shell: ./install.sh
   args:
     executable: /bin/bash
     chdir: /home/{{ ryane_dotfiles_user_name }}/{{ ryane_dotfiles_dotfiles_directory }}
